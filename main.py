@@ -3,89 +3,82 @@ import random
 import os
 import matplotlib.pyplot as plt
 
-sizes = [10, 100, 1000, 10000, 100000, 1000000]
-def generate_word():
-    word = ""
-    number_of_letters = random.randint(1, 10)
-    for _ in range(number_of_letters):
+les_tailles = [10, 100, 1000, 10000, 100000, 1000000]
+def generer_un_mot():
+    mot = ""
+    nombre_de_lettre = random.randint(1, 10)
+    for _ in range(nombre_de_lettre):
         letter_ascii = random.randint(97, 122)
-        word += chr(letter_ascii)
-    return word + " "
+        mot += chr(letter_ascii)
+    return mot + " "
+def generer_une_ligne():
+    ligne = ""
+    nombre_de_mot = random.randint(1, 20)
+    for _ in range(nombre_de_mot):
+        ligne += generer_un_mot()
+    return ligne + " "
 
 
-def generate_line():
-    line = ""
-    number_of_words = random.randint(1, 20)
-    for _ in range(number_of_words):
-        line += generate_word()
-    return line + " "
+def generer_paragraphe(nombre_de_ligne):
+    paragraphe = ""
+    for _ in range(nombre_de_ligne):
+        paragraphe += generer_une_ligne() + "\n"
+    return paragraphe
 
 
-def generate_paragraph(number_of_lines):
-    paragraph = ""
-    for _ in range(number_of_lines):
-        paragraph += generate_line() + "\n"
-    return paragraph
-
-
-def generate_text():
+def generer_texte():
     with open('data.txt', 'w') as file:
-        for size in sizes:
-            file.write(str(size))
+        for taille in les_tailles:
+            file.write(str(taille))
             file.write("\n")
-            file.write(generate_paragraph(size))
+            file.write(generer_paragraphe(taille))
 
 
 def creation_de_text_dans_un_fichier():
     try:
         if os.path.exists("data.txt") == 0 or os.stat("data.txt").st_size == 0:
-            generate_text()
+            generer_texte()
         else:
-            print("the file is not empty")
+            print("le fichier n'est pas vide")
     except:
-        print("An exception occurred file doesnt exist")
+        print("le fichier pas trouver")
 
-
-def calculate_number_of_occurrences(word):
-    times = []
-    number_of_repetitions = 1
+def calculer_le_nombre_doccurences_dun_mot(mot):
+    table_de_temps = []
+    nombre_de_repetition = 1
     with open('data.txt', 'r') as file:
-        current_position = 0
-        for size in sizes:
-            count = 0
-            result = 0
-            for _ in range(number_of_repetitions):
-                file.seek(current_position)  # Set file pointer to the previous position
-                lines = file.readlines()[current_position + 1:size + 1]  # Read only the relevant lines
+        position_actuelle = 0
+        for taille in les_tailles:
+            counteur = 0
+            resultat = 0
+            for _ in range(nombre_de_repetition):
+                file.seek(position_actuelle)  # Set file pointer to the previous position
+                lines = file.readlines()[position_actuelle + 1:taille + 1]  # Read only the relevant lines
                 # Get the current position after reading lines
-                start = time.time()
+                debut = time.time()
                 for line in lines:
-                    words = line.split()
-                    for j in words:
-                        if j == word:
-                            count += 1
-                end = time.time()
-                result += end - start
-            average_times = result / number_of_repetitions
-            times.append(average_times)
-            current_position = size + 1
+                    mots = line.split()
+                    for j in mots:
+                        if j == mot:
+                            counteur += 1
+                fin = time.time()
+                resultat += fin - debut
+            le_temps_moyen = resultat / nombre_de_repetition
+            table_de_temps.append(le_temps_moyen)
+            position_actuelle = taille + 1
+        return table_de_temps
 
-            print(f"For size {size}, occurrences of the word '{word}': {count}")
-            print(f"It takes an average of {average_times} seconds to search for the word\n")
-
-    return times
 
 
 def traçage_courbe():
     creation_de_text_dans_un_fichier()
-    word_to_search = generate_word()
-    search_times = calculate_number_of_occurrences(word_to_search)
-    plt.plot(sizes, search_times, label="The Search of Number of Occurences Time")
-    plt.xlabel("Size")
-    plt.ylabel("Average Time (seconds)")
-    plt.title(f"Time for search the number of occurence for word '{word_to_search}'")
+    mot_a_rechercher = generer_un_mot()
+    tableau_de_temps_de_recherche = calculer_le_nombre_doccurences_dun_mot(mot_a_rechercher)
+    plt.plot(les_tailles, tableau_de_temps_de_recherche, label="Le temps De Recherche de nombre d'occurences")
+    plt.xlabel("Taille")
+    plt.ylabel("Temps Moyen (seconds)")
+    plt.title(f"temps De Recherche de nombre d'occurences '{mot_a_rechercher}'")
     plt.legend()
     plt.show()
-
 
 traçage_courbe()
